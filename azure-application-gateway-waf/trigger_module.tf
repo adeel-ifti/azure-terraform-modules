@@ -3,10 +3,20 @@
 // Both backend apps are SSL configured for front-end. While only Kibana requires backend HTTPS. Grafana backend isn't configured for SSL hence termination will occur.
 // SSL certs are created by Hashi Vault 
 
+// following shell script takes ssl cert issued by your cert-authority and converts to PFX format to be picked up by Elastic Search/Kibana.
+data "external" "es-certificate-pfx" {
+  program = ["bash", "${path.module}/scripts/generate-pfx.sh"]
+
+  query = {
+    certificate = "${module.kibana-appgw-cert.certificate}"
+    private_key = "${module.kibana-appgw-cert.private_key}"
+    password    = "${random_password.kibana-appgw-ssl.result}"
+  }
+}
 
 module "dashboard-appgw" {
   source = "./azure-application-gateway-waf"
-  prefix              = "${var.prefix}"
+  prefix              = "${var.prefix}"  
   location            = "${var.location}"
   resource_group_name = "${var.prefix}-rg"
   subnet_id           = "${var.appgw_subnet_id}"
@@ -15,12 +25,12 @@ module "dashboard-appgw" {
   waf_configuration   = "${local.waf_configuration}"
   dns_label           = "${local.dns_label}"
   backend_prefix      = "${local.backend_prefix}"
-  authentication_certificate = "${module.es-kibana.es_kibana_certficate}"
+  authentication_certificate = "${module.yourcertprovider.es_kibana_certficate}"
 
   frontend_ports   = [
     {
       name = "kibana-port"
-      port = "443"
+      port = "443"              
     },
     {
       name = "grafana-port"

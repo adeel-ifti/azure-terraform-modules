@@ -7,9 +7,13 @@ variable "resource_group_name" {
 }
 
 variable "location" {
+  default = "UK South"
+
 }
 
 variable "prefix" {
+  default = "gw"
+
 }
 
 variable "subnet_id" {
@@ -20,15 +24,32 @@ variable tags {
   default = {}
 }
 
+### since these variables are re-used - a locals block makes this more maintainable
+###
+###
+
 variable "waf_configuration" {
   type = "map"
-  default = {}
+  default = {
+    waf_enabled  = true
+    sku_name     = "WAF_Medium"
+    sku_tier     = "WAF"
+    sku_capacity = "2"
+    firewall_mode    = "Detection"
+    rule_set_type    = "OWASP"
+    rule_set_version = "3.0"
+    file_upload_limit_mb = "100"
+  }
 }
 
 variable "dns_label" {  
+  default = "my-gw"
+
 }
 
 variable "backend_prefix" {
+  default = "gw-backend"
+
 }
 
 variable "frontend_ports" {
