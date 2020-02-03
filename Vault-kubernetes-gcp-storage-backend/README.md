@@ -32,11 +32,19 @@ git clone https://github.com/banzaicloud/bank-vaults.git
 cd bank-vaults/charts/
 ```
 
+Below is an important step where we mount a secret containing service account credentials json. This will then be passed to Vault install command to allow it to access GCP services (KMS,Storage):
+
+```bash
+kubectl create secret generic vault-sa-secret
+--from-literal=GOOGLE_APPLICATION_CREDENTIALS=/etc/gcp/service-account.json 
+--from-file=service-account.json=./service-account.json
+```
+
 Install the chart providing with GCP storage bucket and KMS:
 
 ```bash
 helm install vault \
---set "vault.customSecrets[0].secretName=google" \
+--set "vault.customSecrets[0].secretName=vault-sa-secret" \
 --set "vault.customSecrets[0].mountPath=/etc/gcp" \
 --set "vault.config.storage.gcs.bucket=vault-data-bucket" \
 --set "vault.config.seal.gcpckms.project=prefab-surfer-263006" \
