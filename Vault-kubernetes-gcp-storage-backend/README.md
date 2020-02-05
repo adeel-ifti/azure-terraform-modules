@@ -1,10 +1,10 @@
 # GCP Kubernetes - Hashi Vault with Bucket as backend and KMS for encryption
 
 Setting up:
-* Make sure gcloud sdk is installed and connected with you gcp account & project. 
+* Make sure gcloud sdk is installed and connected to your gcp account & project. 
 * gsutil is installed
 * Helm client is installed on your local machine, if not follow instructions at the bottom. 
-* Vault client from Hashicorp is installed (to use vault status command)
+* Vault client from Hashicorp is installed, if not follow instructions at the bottom .
 
 
 Create work directory and GCP Storage bucket for vault backend:
@@ -28,7 +28,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAUL
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAULT_SERVICE_ACCOUNT --role=roles/cloudkms.User
 ```
 
-![gcp iam service accounts](images/gcp-iam-service-accounts.jpg?raw=true "gcp iam service accounts")
+![gcp iam service accounts](assets/gcp-iam-service-accounts.jpg?raw=true "gcp iam service accounts")
 
 
 Creating symmetric keys and setting GCP project variables:
@@ -53,9 +53,9 @@ gcloud kms keys create vault-backend-testkey \
 ```
 
 
-# GCP Kubernetes - Installing Hashi Vault Helm Chart (Banzai Cloud provided)
+# GCP Kubernetes - Installing Hashi Vault Helm Chart (Banzai provided)
 
-Below is an important step where we mount a secret containing service account credentials json. This will then be passed to Vault install command to allow it to access GCP services (KMS,Storage):
+Below is an important step where we mount a secret containing service account credentials json. This will then be passed to Vault helm install command to allow it to access GCP services (KMS, Storage):
 
 ```bash
 gcloud container clusters create cluster-1 --machine-type "n1-standard-1" --zone us-central1-a  --num-nodes 2 --enable-ip-alias
@@ -65,7 +65,7 @@ kubectl get nodes
 
 kubectl create secret generic vault-sa-secret --from-literal=GOOGLE_APPLICATION_CREDENTIALS=/etc/gcp/service-account.json --from-file=service-account.json=./vault-svc.json
 ```
-![gke cluster create](images/gke-cluster-create.jpg?raw=true "gke cluster create")
+![gke cluster create](assets/gke-cluster-create.jpg?raw=true "gke cluster create")
 
 We are using Banzai Cloud provided chart but same works for official Hashi Vault Docker image as well. Banzai has good support on github with quick responses and has been production tested for couple of years. Install the chart providing with GCP storage bucket and KMS:
 
@@ -100,7 +100,7 @@ helm install vault \
 
 This will install Vault pod with 4 containers as shown below:
 
-![vault deployed](images/vault-deployed.jpg?raw=true "vault deployed")
+![vault deployed](assets/vault-deployed.jpg?raw=true "vault deployed")
 
 
 Copying vault root token from Storage Bucket:
@@ -114,7 +114,7 @@ gcloud kms decrypt --key=vault-backend-testkey --keyring=vault-backend-testring 
 for i in `cat vault-root.dec`; do export VAULT_TOKEN=$i; done
 ```
 
-![vault data backend bucket](images/vault-data-backend-bucket.jpg?raw=true "vault data backend bucket")
+![vault data backend bucket](assets/vault-data-backend-bucket.jpg?raw=true "vault data backend bucket")
 
 
 Initiating Vault Login:
@@ -141,4 +141,4 @@ Cluster ID               cfa20093-a6f3-4800-f527-7d5d25be2f90
 HA Enabled               false
 ```
 
-![gke cluster create](images/vault-root-token-permissions.jpg?raw=true "gke cluster create")
+![gke cluster create](assets/vault-root-token-permissions.jpg?raw=true "gke cluster create")
