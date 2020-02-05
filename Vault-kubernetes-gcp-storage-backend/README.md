@@ -67,7 +67,7 @@ kubectl create secret generic vault-sa-secret --from-literal=GOOGLE_APPLICATION_
 ```
 ![gke cluster create](assets/gke-cluster-create.jpg?raw=true "gke cluster create")
 
-We are using Banzai Cloud provided chart but same works for official Hashi Vault Docker image as well. Banzai has good support on github with quick responses and has been production tested for couple of years. Install the chart providing with GCP storage bucket and KMS:
+We are using Banzai Cloud provided chart but same works for official Hashi Vault deployment as well. Banzai has good support on github and has been production tested for couple of years. Install the chart providing with GCP storage bucket and KMS:
 
 ```bash
 git clone https://github.com/banzaicloud/bank-vaults.git
@@ -125,7 +125,6 @@ export SERVICE_IP=$(kubectl get svc --namespace default vault -o jsonpath='{.sta
 export VAULT_ADDR=https://$SERVICE_IP:8200
 export VAULT_SKIP_VERIFY=1
 
-echo "Vault status"
 vault status
 
 Key                      Value
