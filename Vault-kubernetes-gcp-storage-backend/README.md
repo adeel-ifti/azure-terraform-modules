@@ -1,14 +1,33 @@
 # GCP Kubernetes - Hashi Vault with Bucket as backend and KMS for encryption
 
-Create GCP Storage bucket for vault backend:
+Create work directory and GCP Storage bucket for vault backend:
 
 ```bash
+rm -rf ~/github/gcp-vault
+mkdir -p ~/github/gcp-vault
+cd ~/github/gcp-vault
+
 gsutil mb gs://vault-data-bucket
 ```
 
-Creating symmetric keys
+Creating vault svc account with appropriate permissions. Compute role is only needed if you want to fetch vault kv secrets by compute instances. Remove unwanted permissions before running the command. 
+```bash
+gcloud iam service-accounts create vault-svc-account --display-name "Vault Service Account"
+gcloud iam service-accounts keys create vault-svc.json --iam-account=$VAULT_SERVICE_ACCOUNT 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAULT_SERVICE_ACCOUNT --role=roles/iam.serviceAccountUser
+gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAULT_SERVICE_ACCOUNT --role=roles/iam.serviceAccountKeyUser
+gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAULT_SERVICE_ACCOUNT --role=roles/compute.User
+gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAULT_SERVICE_ACCOUNT --role=roles/cloudkms.User
+```
+
+Creating symmetric keys and setting GCP project variables:
 
 ```bash
+export PROJECT_ID=`gcloud config get-value core/project`
+export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
+export VAULT_SERVICE_ACCOUNT=vault-svc-account@$PROJECT_ID.iam.gserviceaccount.com
+
 gcloud kms keyrings create vault-backend-testring   --location global
 ```
 
@@ -25,22 +44,23 @@ gcloud kms keys create vault-backend-testkey \
 
 # GCP Kubernetes - Installing Hashi Vault Helm Chart (Banzai Cloud provided)
 
-We are using Banzai Cloud provided chart but same works for official Hashi Vault Docker image as well. Banzai has good support on github with quick responses and has been production tested for couple of years. 
+Below is an important step where we mount a secret containing service account credentials json. This will then be passed to Vault install command to allow it to access GCP services (KMS,Storage):
+
+```bash
+gcloud container clusters create cluster-1 --machine-type "n1-standard-1" --zone us-central1-a  --num-nodes 2 --enable-ip-alias
+sleep 30
+gcloud container clusters get-credentials cluster-1 --zone us-central1-a
+kubectl get nodes
+
+kubectl create secret generic vault-sa-secret --from-literal=GOOGLE_APPLICATION_CREDENTIALS=/etc/gcp/service-account.json --from-file=service-account.json=./vault-svc.json
+```
+
+We are using Banzai Cloud provided chart but same works for official Hashi Vault Docker image as well. Banzai has good support on github with quick responses and has been production tested for couple of years. Install the chart providing with GCP storage bucket and KMS:
 
 ```bash
 git clone https://github.com/banzaicloud/bank-vaults.git
 cd bank-vaults/charts/
 ```
-
-Below is an important step where we mount a secret containing service account credentials json. This will then be passed to Vault install command to allow it to access GCP services (KMS,Storage):
-
-```bash
-kubectl create secret generic vault-sa-secret
---from-literal=GOOGLE_APPLICATION_CREDENTIALS=/etc/gcp/service-account.json 
---from-file=service-account.json=./service-account.json
-```
-
-Install the chart providing with GCP storage bucket and KMS:
 
 ```bash
 helm install vault \
@@ -73,18 +93,23 @@ This will install Vault pod with 4 containers as shown below:
 Copying vault root token from Storage Bucket:
 
 ```bash
+cd ~/github/gcp-vault
+echo "Please wait ..............."
 gsutil copy gs://vault-data-bucket/vault-root .
+gcloud kms decrypt --key=vault-backend-testkey --keyring=vault-backend-testring --location=global --ciphertext-file=vault-root --plaintext-file=vault-root.dec
+
+for i in `cat vault-root.dec`; do export VAULT_TOKEN=$i; done
 ```
 
-Decrypting vault root token:
-
+Initiating Vault Login:
 ```bash
-gcloud kms decrypt \
-    	--key=vault-backend-testkey \
-    	--keyring=vault-backend-testring \
-    	--location=global \
-    	--ciphertext-file=vault-root \
-    	--plaintext-file=vault-root
+echo "Please wait ..............."
+sleep 60
+export SERVICE_IP=$(kubectl get svc --namespace default vault -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export VAULT_ADDR=https://$SERVICE_IP:8200
+export VAULT_SKIP_VERIFY=1
+
+echo "Vault status"
+vault status
 ```
 
-<picture>
