@@ -1,10 +1,10 @@
 # GCP Kubernetes - Hashi Vault with Bucket as backend and KMS for encryption
 
 Setting up:
-i.   Make sure gcloud sdk is installed and connected with you gcp account & project. 
-ii.  gsutil is installed
-iii. Helm client is installed on your local machine, if not follow instructions at the bottom. 
-iv.  Vault client from Hashicorp is installed (to use vault status command)
+* i.   Make sure gcloud sdk is installed and connected with you gcp account & project. 
+* ii.  gsutil is installed
+* iii. Helm client is installed on your local machine, if not follow instructions at the bottom. 
+* iv.  Vault client from Hashicorp is installed (to use vault status command)
 
 
 Create work directory and GCP Storage bucket for vault backend:
@@ -127,6 +127,18 @@ export VAULT_SKIP_VERIFY=1
 
 echo "Vault status"
 vault status
+
+Key                      Value
+---                      -----
+Recovery Seal Type       shamir
+Initialized              true
+Sealed                   false
+Total Recovery Shares    5
+Threshold                3
+Version                  1.3.1
+Cluster Name             vault-cluster-83ab9435
+Cluster ID               cfa20093-a6f3-4800-f527-7d5d25be2f90
+HA Enabled               false
 ```
 
 ![gke cluster create](images/vault-root-token-permissions.jpg?raw=true "gke cluster create")
