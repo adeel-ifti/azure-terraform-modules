@@ -21,6 +21,9 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAUL
 gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$VAULT_SERVICE_ACCOUNT --role=roles/cloudkms.User
 ```
 
+![Alt text](images/gcp-iam-service-accounts?raw=true "gcp iam service accounts")
+
+
 Creating symmetric keys and setting GCP project variables:
 
 ```bash
@@ -90,7 +93,7 @@ helm install vault \
 
 This will install Vault pod with 4 containers as shown below:
 
-![Alt text](images/vault-deployed.jpg?raw=true "gke cluster create")
+![Alt text](images/vault-deployed.jpg?raw=true "vault deployed")
 
 
 Copying vault root token from Storage Bucket:
@@ -104,7 +107,7 @@ gcloud kms decrypt --key=vault-backend-testkey --keyring=vault-backend-testring 
 for i in `cat vault-root.dec`; do export VAULT_TOKEN=$i; done
 ```
 
-![Alt text](images/vault-data-backend-bucket.jpg?raw=true "gke cluster create")
+![Alt text](images/vault-data-backend-bucket.jpg?raw=true "vault data backend bucket")
 
 
 Initiating Vault Login:
