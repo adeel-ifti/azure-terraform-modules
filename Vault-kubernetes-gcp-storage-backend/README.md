@@ -42,6 +42,7 @@ gcloud kms keys create vault-backend-testkey \
   --next-rotation-time 2021-01-01
 ```
 
+
 # GCP Kubernetes - Installing Hashi Vault Helm Chart (Banzai Cloud provided)
 
 Below is an important step where we mount a secret containing service account credentials json. This will then be passed to Vault install command to allow it to access GCP services (KMS,Storage):
@@ -54,6 +55,7 @@ kubectl get nodes
 
 kubectl create secret generic vault-sa-secret --from-literal=GOOGLE_APPLICATION_CREDENTIALS=/etc/gcp/service-account.json --from-file=service-account.json=./vault-svc.json
 ```
+![Alt text](images/gke-cluster-create.png?raw=true "gke cluster create")
 
 We are using Banzai Cloud provided chart but same works for official Hashi Vault Docker image as well. Banzai has good support on github with quick responses and has been production tested for couple of years. Install the chart providing with GCP storage bucket and KMS:
 
