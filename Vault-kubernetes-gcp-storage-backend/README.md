@@ -1,4 +1,4 @@
-# GCP Kubernetes - Hashi Vault with Bucket as backend and KMS for encryption
+# GCP, Kubernetes - Installing Hashi Vault with KMS encrypted bucket as vault backend
 
 Setting up:
 * Make sure gcloud sdk is installed and connected to your gcp account & project. 
@@ -141,3 +141,11 @@ HA Enabled               false
 ```
 
 ![gke cluster create](assets/vault-root-token-permissions.jpg?raw=true "gke cluster create")
+
+# Instructions:
+* Installing Helm client:
+
+
+
+* Installing Vault client:
+
