@@ -1,4 +1,4 @@
-# GCP, Kubernetes - Installing Hashi Vault with KMS encrypted bucket as vault backend
+# GCP, Kubernetes - Installing Hashi Vault with KMS encrypted storage bucket as vault backend
 
 Setting up:
 * Make sure gcloud sdk is installed and connected to your gcp account & project. 
@@ -38,7 +38,7 @@ export PROJECT_ID=`gcloud config get-value core/project`
 export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
 export VAULT_SERVICE_ACCOUNT=vault-svc-account@$PROJECT_ID.iam.gserviceaccount.com
 
-gcloud kms keyrings create vault-backend-testring   --location global
+gcloud kms keyrings create vault-backend-testring --location global
 ```
 
 Create GCP kms key using above keyring:
