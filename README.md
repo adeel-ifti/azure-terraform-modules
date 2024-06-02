@@ -15,9 +15,7 @@ For more information, see the [introduction section](http://www.terraform.io/int
 
 Getting Started & Documentation
 -------------------------------
-
 If you're new to Terraform and want to get started creating infrastructure, please checkout 
-
 All documentation is available on the [Terraform website](http://www.terraform.io):
 
   - [Intro](https://www.terraform.io/intro/index.html)
