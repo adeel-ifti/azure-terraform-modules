@@ -1,0 +1,54 @@
+we can set up pyhton (anaconda navigator) on GCP and run some models? 
+Much appreciated! We’ve hit a dead end on our climate model which we need to run for year end. It takes 35 hours to run and we would need to drop a lot of data in there
+Our climate model utilises a lot of geospatial data, so we’d need a decent bit of storage (20-30Gb) for all the datasets. One model matches the addresses of collateral we have on book to addresses within an EPC repository. They’re standalone addresses so no collateral reference, customer no. etc to identify with. Could this be used in the cloud?
+
+
+If we are just able to get python running and then get the modules Ash needs then we should be able to run the model. Problem is we cant run a 35 hour model locally on our laptops as they disconnect us and the model cant complete. If you get us in the cloud we can just set it running and leave it. It may even speed up the run time
+
+
+
+1. Sounds like laptop is connected over vpn while you run the models - does it mean python script needs Datasource available only over CB vpn?
+2. We will need a list of code libraries that python script requires (so that we could spin up equivalent in GCP VMs or Docker)?
+ 
+
+
+
+
+The model will be run over vpn from a laptop - we keep the datasets on the Bank’s servers, due to their size, so a connection would need to be established between the servers storing the data and wherever the scripts will be ran from.
+ 
+Just to explain the details surrounding the packages in use – we use Spyder, accessed through Anaconda Navigator, however we install our packages through the Pip installer, not Conda. The scripts should run smoothly on a simple Python installation.
+ 
+Assuming a standard Python installation with its complete base set of modules, we would also additionally require the following packages –
+ 
+•	Postcodes_io_api
+•	Folium
+•	Geopandas
+•	Fiona
+•	Ast
+•	Shapely
+•	Plotly
+•	Fuzzywuzzy
+ 
+Geopandas can be notoriously difficult to install on Windows OS, depending on your firewall/proxy setup, so if you encounter any installation issues I should be able to support.
+
+
+
+
+Thanks for your reply – that’s what we were looking for. GCP (vdc) has reserved area for CB on-prem connectivity so in theory, should be fine.  
+ 
+I am thinking out loud here, how about we come up with docker image of these libraries (plenty of pre-configured python based docker images exist with below libraries in the data science world)?
+ 
+Secondly, have you looked into GCP Dataproc to run python jobs? (Google/youtube search: GCP Dataproc custom python environment)
+We don’t expect you to be Dataproc expert or anything, just sharing ideas. 
+ 
+Let’s connect next year on this further chaps, speak soon. 
+
+
+
+I know very little of docker images but if we think it could produce what we’re after it’s a channel worth exploring.
+
+I’ll touch up on Adeel’s suggestions so we can discuss on his return.
+
+I’m free today Nick / Manoj if you wanted to touch base.
+
+
