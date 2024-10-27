@@ -30,3 +30,32 @@ https://medium.com/@sadoksmine8/advanced-exploration-of-google-cloud-pub-sub-39f
 
 ======
 
+links:
+google skill boost: https://www.cloudskillsboost.google/paths/19/course_templates/42/video/434938?locale=uk
+
+pub sub quotas: https://cloud.google.com/pubsub/quotas#quotas
+
+picutre understanding difference bw kafka and pub/sub
+
+Understanding the differences between Kafka and Pub/Sub
+
+https://cloud.google.com/pubsub/docs/migrating-from-kafka-to-pubsub#understanding_the_differences_between_kafka_and_pub_sub
+
+=====
+
+migrate from kafka to pubsub:
+https://cloud.google.com/pubsub/docs/migrating-from-kafka-to-pubsub
+
+
+Pub/Sub message size limits and workarounds
+https://cloud.google.com/pubsub/docs/migrating-from-kafka-to-pubsub#pub_sub_message_size_limits_and_workarounds
+
+what is pubsub
+https://cloud.google.com/pubsub/docs/overview
+
+Example Architecture Patterns using pub/sub
+https://cloud.google.com/s/results?q=pub%2Fsub&text=pub%2Fsub
+
+
+
+
