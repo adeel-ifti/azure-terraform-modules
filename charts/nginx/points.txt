@@ -1,0 +1,32 @@
+Links
+
+https://cloud.google.com/blog/products/data-analytics/pubsub-cloud-storage-subscriptions-for-streaming-data-ingestion
+Now, you no longer need to build complex pipelines to ingest your streaming data into Cloud Storage. The Pub/Sub team is excited to announce Cloud Storage subscriptions, a new type of subscription to help you write your raw data into Cloud Storage without any transformations in between. 
+
+=====
+
+Building an event-driven architecture
+
+https://www.googlecloudcommunity.com/gc/Community-Blogs/Building-event-driven-architectures-on-Google-Cloud/ba-p/603961
+=====
+
+Stream from Pub/Sub to BigQuery 
+This tutorial uses the Pub/Sub Subscription to BigQuery template to create and run a Dataflow template job using the Google Cloud console or Google Cloud CLI. The tutorial walks you through a streaming pipeline example that reads JSON-encoded messages from Pub/Sub, uses a User-Defined Function (UDF) to extend the Google-provided streaming template, transforms message data with the Apache Beam SDK, and writes the results to a BigQuery table.
+
+https://cloud.google.com/dataflow/docs/tutorials/dataflow-stream-to-bigquery
+
+======
+
+Handling failed messages:
+
+======
+
+
+Components of Cloud Pub/Sub
+a. Topics
+A topic is essentially a feed name to which messages can be sent by publishers. Each topic is globally unique and can have multiple subscriptions but only one publisher.
+
+https://medium.com/@sadoksmine8/advanced-exploration-of-google-cloud-pub-sub-39f237cec50a
+
+======
+
