@@ -1,1 +1,64 @@
 txt
+
+Recommended Best Practices for Using Pub/Sub Topics
+Here are some best practices for effectively using Pub/Sub:
+
+1. Designing Topics and Subscriptions
+One Topic per Event Type: Keep topics focused on a single type of event to simplify processing.
+
+Use Multiple Subscriptions: Different consumers can have independent subscriptions for flexibility.
+
+Subscription Types:
+
+Pull: The subscriber explicitly requests messages.
+
+Push: Pub/Sub sends messages to an endpoint (like Cloud Functions or Cloud Run).
+
+
+2. Message Retention and Delivery
+Acknowledge Messages Promptly: Subscribers should acknowledge only after processing is complete.
+
+Dead Letter Topics (DLT): Configure Dead Letter Topics to handle unprocessed messages.
+
+Retry Policies: Use exponential backoff for retries in case of failures.
+
+
+3. Scalability and Performance
+Batching & Flow Control: Enable message batching for performance gains.
+
+Parallelism: Use multiple subscribers to scale out processing.
+
+Ordering Keys: If message order is important, use ordering keys within a topic.
+
+Designing an efficient topic and subscription architecture is critical for ensuring scalability, reliability, and maintainability in a GCP Pub/Sub system. Here’s how to approach this effectively:
+
+If some messages are critical (e.g., fraud detection alerts), they should have a dedicated topic.
+
+
+If some messages are critical (e.g., fraud detection alerts), they should have a dedicated topic.
+
+Example:
+
+critical-alerts
+
+logs-info
+
+audit-events
+
+If supporting multiple customers, consider:
+
+Single topic for all tenants (simpler but needs filtering).
+
+One topic per tenant (better isolation, but more complex).
+
+1.4 Use Schema Validation
+Use Pub/Sub Schemas to enforce JSON/Avro message formats.
+
+Prevents malformed messages from breaking consumers.
+
+properties of a topic:
+https://cloud.google.com/pubsub/docs/create-topic#properties_of_a_topic
+
+https://cloud.google.com/pubsub/docs/publish-best-practices
+https://cloud.google.com/pubsub/docs/subscribe-best-practices
+
