@@ -1,0 +1,270 @@
+Control 221 — All containers MUST run with latest patches (High/Critical CVEs)
+
+Enable GKE node auto-upgrade and use Container Analysis / Artifact Registry vulnerability scanning to detect high/critical CVEs in images.
+Enforce image freshness via Binary Authorization policies, blocking deployment of images older than 30 days or with unpatched critical CVEs.
+Implement a Cloud Monitoring / Security Command Center alert to notify GBGF of containers running beyond 30 days.
+Integrate CI/CD pipeline gates (outside GKE) to fail builds with unresolved high/critical findings before images are promoted.
+
+
+Control 265 — Principle of Least Privilege for IAM on GCP Estate
+
+Audit and remediate IAM bindings using IAM Recommender to right-size over-permissioned roles across the GCP estate.
+Enforce custom or predefined minimal roles per workload/service account; prohibit broad primitive roles (Owner/Editor) via Org Policy constraints.
+Enable Cloud Audit Logs (Data + Admin Access) for all privileged IAM usage to ensure non-repudiation and feed into a SIEM.
+Apply IAM Conditions on GKE service agents to restrict forwarding-rule creation, preventing indirect external Load Balancer provisioning as per LB CSB guidance.
+
+Control 300/301 — Configure HTTP Security Headers & Encrypted Interfaces
+
+Enforce the following response headers on all APIs via API Gateway, Cloud Armor, or application middleware: Cache-Control: no-store, Content-Security-Policy: frame-ancestors 'none', Content-Type: application/json, Strict-Transport-Security (HSTS), X-Content-Type-Options: nosniff, and X-Frame-Options: DENY.
+Apply Cloud Armor security policies to inspect and enforce header hygiene at the load balancer layer for inbound traffic.
+Mandate TLS 1.2+ on all inbound/outbound interfaces, enforced via SSL policies on GCP Load Balancers and rejecting plaintext connections through Org Policy (constraints/compute.requireSslPolicy).
+
+  Control 302 — Configure Interfaces to Use TLS 1.2
+
+Enforce SSL policies on GCP Load Balancers with minimum TLS 1.2 and restrict weak cipher suites via gcloud compute ssl-policies.
+Apply Org Policy constraints/compute.requireSslPolicy to prevent deployment of resources without an approved SSL policy.
+
+
+Control 303 — Deploy Authorisation Checks (AuthZ at SAPI Layer)
+
+Implement AuthZ validation at the SAPI/API Gateway layer using OAuth 2.0 scopes or OPA (Open Policy Agent) to verify every action against the requesting account's entitlements before processing.
+
+
+Control 304 — Ensure CORS Correctly Configured or Disabled
+
+Configure explicit CORS allowlists (specific origins only) on API Gateway/Cloud Endpoints; if no cross-domain calls are expected, disable CORS headers entirely to eliminate attack surface.
+
+
+Control 305 — Downstream Credentials Stored Securely
+
+Store all API credentials and downstream secrets in GCP Secret Manager with CMEK encryption, IAM-scoped access, and automatic rotation policies enabled.
+
+
+Control 306 — Error Messages Contain Generic Information Only
+
+Configure API error handlers to return generic HTTP status codes only (e.g. 400/500), suppressing stack traces, internal paths, or system hints; enforce via API Gateway response templates.
+
+
+Control 307 — No Sensitive Data in URL
+
+Enforce POST/PUT for sensitive payloads via API design standards; apply Cloud Armor WAF rules to detect and block requests containing tokens or credentials in query strings.
+
+
+Control 308 — PoLP Applied to API Authentication
+
+Apply least-privilege IAM service accounts per API; validate and reject unexpected Content-Type headers with HTTP 406/415 responses, and enforce XML parser hardening to prevent XXE attacks.
+
+
+Control 309–310 — Validate Request Content Types / Error Messages Without Sensitive Data
+
+Enforce strict @produces/@consumes annotations (e.g. application/json) at the API layer; sanitise all error responses to strip sensitive fields before returning to the client.
+
+
+Control 311 — Logs Must Not Contain Sensitive Data
+
+Implement log sanitisation middleware to redact PII, tokens, and credentials before writing to Cloud Logging; apply log sinks with DLP inspection via Cloud DLP to detect and alert on sensitive data leakage.
+
+
+Control 312 — Validate and Sanitise All API Inputs
+
+Enforce input validation (type, length, format, regex) at the API gateway and application layer; use secure XML parsers (XXE-safe), set request size limits (HTTP 413), and log repeated validation failures as anomalies in Cloud Monitoring/SIEM.
+
+
+Control 313 — Robust API Authentication Mechanism
+
+Enforce OAuth 2.0 / mTLS at the API Gateway; ensure every request carries a valid authentication token validated before processing, per platform architecture guidance.
+
+
+Control 314 — Log Security Events
+
+Stream all security events (auth failures, validation failures, config changes, excessive use) to Cloud Logging → SIEM, ensuring sensitive data is excluded from log payloads via DLP inspection.
+
+
+Control 315 — Sanitise Data Inputs
+
+Apply server-side input sanitisation for malicious code, incorrect types, malformed requests, and out-of-bound values using validation frameworks; integrate with Cloud Armor for perimeter-level filtering.
+
+
+
+  Control 316 — Secure Downstream Authentication Credentials
+
+Store downstream credentials exclusively in GCP Secret Manager or HashiCorp Vault (never in code/config); enforce automated rotation and audit all access via Cloud Audit Logs.
+
+
+Control 317 — Authenticate Request Prior to Processing
+
+Validate that every API request passes through the API Gateway with a valid auth token before any backend processing; reject unauthenticated requests at the gateway with HTTP 401.
+
+
+Control 318 — Use Appropriate HTTP Methods
+
+Enforce POST for sensitive data transfers; store credentials in GCP Secret Manager with automated rotation workflows; enable IAM audit logging to monitor all credential access and configuration changes.
+
+
+Control 318 — Use Appropriate HTTP Methods
+
+Enforce POST for all sensitive data transfers; configure API Gateway to reject incorrect HTTP methods with 405 Method Not Allowed.
+Store all API keys, tokens, and passwords in GCP Secret Manager with CMEK, automated rotation, and expiration policies; never embed credentials in code.
+
+
+Control 367 — Enforce Strict Access Control & Minimise Credential Exposure
+
+Apply GCP IAM least-privilege roles per microservice identity; use Workload Identity on GKE to eliminate static service account keys entirely.
+Enable Cloud Audit Logs for all IAM actions; regularly review with IAM Recommender and enforce automated credential rotation via Secret Manager; ensure logs exclude sensitive data to satisfy GDPR/CCPA.
+
+
+Control 368 — Enhance Logging, Monitoring & Coding Policies
+
+Route all microservice logs to Cloud Logging with Cloud DLP inspection to strip sensitive data before ingestion; enforce consistent structured logging (JSON) across all components.
+Define log levels (DEBUG/INFO/WARNING/ERROR) per event type; configure Cloud Monitoring alerting policies and SIEM integration for real-time anomaly detection on auth failures, data changes, and excessive use.
+Implement SIGTERM handlers, readiness/liveness probes on all GKE pods to ensure graceful shutdown and data integrity during restarts.
+
+
+Control 369 — Ensure Resilient Scalability Configurations
+
+Define Kubernetes resource requests and limits on all pods; enforce ResourceQuota and LimitRange objects per namespace to prevent resource starvation or overuse.
+Use HorizontalPodAutoscaler (HPA) and GKE cluster autoscaler for dynamic scaling; conduct regular load testing to validate and refine resource thresholds.
+Implement centralised observability via Cloud Monitoring/Prometheus + Grafana for performance bottleneck detection and resource allocation optimisation.
+
+
+  Control 370 — Implement Resource Control and Orchestration
+
+Enforce Kubernetes ResourceQuota and LimitRange per namespace; use HPA and GKE cluster autoscaler to prevent resource starvation or overuse.
+Monitor via Prometheus/Grafana and Cloud Monitoring; regularly audit and tune resource thresholds based on load test results.
+
+
+Control 371 — Implement Secure Configurations and Data Protection
+
+Conduct a threat model to identify encryption requirements; apply AES/RSA encryption for sensitive data at rest using GCP KMS (CMEK) for key management.
+Enforce access controls so only authorised processes can decrypt data; regularly audit encryption configs and rotate keys per policy.
+
+
+Control 372/373 — Secure Container Images and Reduce Attack Surface
+
+Enforce Binary Authorization to only allow signed images in production; use Artifact Registry vulnerability scanning and integrate Trivy/Clair into CI/CD to block critical CVEs.
+Apply GKE Security Contexts, enforce non-root containers, drop unnecessary Linux capabilities, and use Pod Security Admission to enforce security constraints cluster-wide.
+Regularly update base images, remove unused dependencies, and scan with Snyk/Trivy on every build.
+
+
+Control 374 — Use Secure Network Communication Protocols
+
+Enforce mTLS between all microservices using Istio/Anthos Service Mesh; restrict inter-service communication to necessary ports only via GKE Network Policies.
+Integrate TLS verification into CI/CD pipelines; enforce minimum TLS 1.2 on all ingress/egress via GCP SSL policies; conduct regular protocol security reviews.
+
+
+Control 375 — Enforce Secure File Permissions on PostgreSQL Database Files
+
+Apply least-privilege OS-level permissions (chmod/chown) on all PostgreSQL data files, restricting access to the postgres service account only.
+Enforce permissions via centralised config management (Ansible/Terraform); audit file permissions regularly and integrate checks into deployment pipelines.
+
+
+Control 376 — Enforce TLS Encryption for All PostgreSQL Connections
+
+Enable ssl = on in postgresql.conf; enforce TLS 1.2/1.3 only with strong cipher suites, disabling deprecated protocols (SSLv3, TLS 1.0/1.1).
+Manage certificates via GCP Certificate Manager; monitor and audit all connections to verify TLS compliance; restrict network access to PostgreSQL via VPC firewall rules allowing only authorised subnets.
+
+
+Control 377 — Harden PostgreSQL Configuration and Network Access
+
+Harden postgresql.conf and pg_hba.conf to disable unnecessary services, enforce strong auth parameters, and enable detailed audit logging.
+Deploy PostgreSQL in private VPC subnets with Cloud Armor/firewall rules restricting access to authorised IPs/subnets only; perform periodic security audits.
+
+
+Control 378 — Implement Rate Limiting and Resource Throttling
+
+Configure connection pooling (PgBouncer) and query rate limits via PostgreSQL middleware to prevent overload during traffic spikes.
+Apply cgroup-based CPU/memory throttling on PostgreSQL processes; monitor via Cloud Monitoring with alerts on resource threshold breaches.
+
+
+Control 379 — Strong Authentication and RBAC for PostgreSQL
+
+Integrate PostgreSQL with LDAP/Active Directory for centralised auth with MFA; enforce strong password policies via pg_hba.conf.
+Define granular RBAC roles with minimum required privileges per user/service; audit role assignments and auth logs regularly via Cloud Logging/SIEM.
+
+
+Control 380 — Secure Backup Procedures with Encryption and Access Controls
+
+Encrypt all PostgreSQL backups using AES-256 before storage; store in GCP Cloud Storage with CMEK and restrict access via IAM bucket policies to authorised users only.
+Automate backup routines via Cloud Scheduler/scripts with consistent encryption enforcement; audit backup logs regularly to verify integrity and access compliance.
+
+
+Control 381 — Patch Management for PostgreSQL
+
+Subscribe to PostgreSQL security bulletins; validate patches in a staging environment before production rollout; automate deployment via Cloud Build/Terraform pipelines.
+Maintain a version inventory in Security Command Center; audit regularly to confirm all instances run the latest secure PostgreSQL version.
+
+
+Control 382 (PostgreSQL - ESL) — Use Parameterized Queries and Validate Inputs
+
+Enforce parameterized queries/prepared statements across all application DB interactions to prevent SQL injection; integrate SAST tools (SonarQube/Checkmarx) in CI/CD to detect injection vulnerabilities automatically.
+Implement input validation routines for format, type, and length; conduct periodic penetration testing to verify consistent application of parameterization.
+
+
+Control 383 (PostgreSQL - Staging DBMS) — Enforce Secure File Permissions on PostgreSQL Database Files
+
+Apply least-privilege chmod/chown on all PostgreSQL data files restricting access to the postgres service account only; enforce via centralised config management (Ansible/Terraform).
+Integrate file permission audit checks into deployment pipelines; monitor for permission drift via Cloud Security Command Center.
+
+
+Control 384 (PostgreSQL - Staging DBMS) — Enforce TLS Encryption for All Connections
+
+Enable ssl = on in postgresql.conf; enforce TLS 1.2/1.3 with strong cipher suites only, disabling deprecated protocols.
+Manage certificates via GCP Certificate Manager; regularly audit connection logs to verify universal TLS compliance.
+
+
+Control 385 (PostgreSQL - Staging DBMS) — Harden PostgreSQL Configuration and Restrict Network Access
+
+Harden postgresql.conf and pg_hba.conf to disable unnecessary services and enforce strong auth; deploy PostgreSQL in private VPC subnets with firewall rules restricting access to authorised IPs only.
+Perform periodic security audits to ensure DB settings and network policies remain aligned with evolving security standards.
+
+
+
+Control 386 (PostgreSQL - Staging DBMS) — Implement Rate Limiting and Resource Throttling
+
+Configure PgBouncer connection pooling and query rate limits via middleware to prevent traffic spike overload.
+Apply cgroup CPU/memory throttling on PostgreSQL processes; monitor continuously via Cloud Monitoring with threshold breach alerts.
+
+
+Control 387 (PostgreSQL - Staging DBMS) — Robust Authentication and RBAC
+
+Integrate PostgreSQL with LDAP/Active Directory supporting MFA; enforce strong password policies via pg_hba.conf and centralise identity management for consistent provisioning.
+Define granular RBAC roles with minimum required privileges; audit role assignments and auth logs via Cloud Logging/SIEM for anomaly detection.
+
+
+Control 388 (PostgreSQL - Staging DBMS) — Secure Backup Procedures with Encryption and Access Controls
+
+Encrypt all backups with AES-256 before storage in GCP Cloud Storage with CMEK; restrict access via IAM bucket policies to authorised users only.
+Automate backup routines via Cloud Scheduler; regularly audit backup logs to verify encryption and access control integrity.
+
+
+Control 389 (PostgreSQL - Staging DBMS) — Regularly Update PostgreSQL to Latest Secure Version
+
+Subscribe to PostgreSQL security bulletins; validate patches in staging before production rollout via automated CI/CD pipelines (Cloud Build/Terraform).
+Maintain a version inventory and audit regularly in Security Command Center to confirm all instances run the latest secure version.
+
+
+Control 390 (PostgreSQL - Staging DBMS) — Use Parameterized Queries and Validate Inputs
+
+Enforce prepared statements/parameterized queries across all DB interactions; integrate automated SAST scanning into CI/CD to detect injection and improper input handling.
+Conduct periodic code reviews and penetration testing to verify consistent enforcement of input validation and parameterization.
+
+
+Control 395 (Web UI) — Frame-Busting Scripts, X-Frame-Options and Content Security Policy
+
+Set X-Frame-Options: DENY and Content-Security-Policy: frame-ancestors 'self' headers on all web UI responses via web server config (nginx/Apache) or Cloud Armor.
+Implement frame-busting JavaScript as a defence-in-depth layer; use automated tools to verify headers are consistently applied across all endpoints; regularly scan for security flaws.
+
+
+Control 402 (Web UI) — Least Privilege Mechanisms + SAST/DAST
+
+Enforce PoLP on all Web UI service accounts and user roles; integrate SAST tools (SonarQube/Checkmarx) into CI/CD pipelines for automated source code security analysis.
+Run DAST tools (OWASP ZAP/Burp Suite) against live environments to detect runtime vulnerabilities; conduct regular penetration testing to identify residual risks.
+
+
+Control 406 (Web UI) — Update Dependencies, Dependency Scanning and Secure Coding
+
+Integrate Snyk or Dependabot into CI/CD to automatically detect and flag vulnerable dependencies; enforce a policy blocking deployments with known high/critical CVEs.
+Follow OWASP Top 10 secure coding practices; conduct regular security assessments, maintain documented dependency management policies, and remove unused libraries promptly.
+
+
+
